@@ -1,23 +1,3 @@
-$Humio = @{ Cloud = ''; Token = '' }
-switch ($Humio) {
-    { $_.Cloud -and $_.Cloud -notmatch '/$' } { $_.Cloud += '/' }
-    { ($_.Cloud -and !$_.Token) -or ($_.Token -and !$_.Cloud) } {
-        throw "Both 'Cloud' and 'Token' are required when sending results to Humio."
-    }
-    { $_.Cloud -and $_.Cloud -notmatch '^https://cloud(.(community|us))?.humio.com/$' } {
-        throw "'$($_.Cloud)' is not a valid Humio cloud value."
-    }
-    { $_.Token -and $_.Token -notmatch '^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}$' } {
-        throw "'$($_.Token)' is not a valid Humio ingest token."
-    }
-    { $_.Cloud -and $_.Token -and [Net.ServicePointManager]::SecurityProtocol -notmatch 'Tls12' } {
-        try {
-            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        } catch {
-            throw $_
-        }
-    }
-}
 [scriptblock]$Script = {
     param([int]$Id,[boolean]$Delete,[string]$OutLog,[string]$ErrLog,[string]$Cloud,[string]$Token)
     $Run = (Get-Process -Id $Id).Path; Wait-Process $Id
